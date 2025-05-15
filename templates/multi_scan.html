@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-20 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            <div class="mb-3 mb-sm-0">
+              <h5 class="card-title fw-semibold">Vulnerability Scanner</h5>
+            </div>
+          </div>
+
+          <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>URL to scan:</label>
+              <input type="url" name="url" class="form-control form-control-lg" placeholder="https://site.com/" required>
+            </div>
+            <br>
+            <div class="form-group">
+              <label>Select Scans:</label><br>
+              <label><input type="checkbox" name="scan_type" value="ssti"> SSTI</label><br>
+              <label><input type="checkbox" name="scan_type" value="xss"> XSS</label><br>
+              <label><input type="checkbox" name="scan_type" value="sqli"> SQLi</label><br>
+              <label><input type="checkbox" name="scan_type" value="lfi"> LFI</label><br>
+              <label><input type="checkbox" name="scan_type" value="redirect"> Open Redirect</label><br>
+              <label><input type="checkbox" name="scan_type" value="headers"> Security Headers</label><br>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">Scan</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if url %}
+  <br><br>
+  <style>
+    .result-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .result-label {
+      font-weight: bold;
+      margin-right: 5px;
+      font-size: 18px;
+    }
+
+    .result-value {
+      margin-right: 20px;
+      font-size: 18px;
+    }
+  </style>
+
+  <div class="result-row">
+    <span class="result-label">URL:</span> <span class="result-value">{{ url }}</span>
+  </div>
+
+  <br>
+  <!-- Result Table -->
+  <div class="row">
+    <div class="col-lg-20 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            <div class="mb-3 mb-sm-0">
+              <h5 class="card-title fw-semibold">Report</h5>
+            </div>
+          </div>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Vulnerability</th>
+                <th>Payload,Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p, s in result.items %}
+              <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ p }}</td>
+                <td>{{ s }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- History Section -->
+  <br>
+  <div class="row">
+    <div class="col-lg-20 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            <div class="mb-3 mb-sm-0">
+              <h5 class="card-title fw-semibold">History</h5>
+            </div>
+          </div>
+
+          {% if results %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Target Url</th>
+                <th>Scanned On</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in results %}
+              <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ result.url }}</td>
+                <td>{{ result.created_on }}</td>
+                <td>
+                  <a class="btn btn-primary" data-bs-toggle="modal" href="#modal-{{ forloop.counter }}" role="button">Details</a>
+
+                  <!-- Modal -->
+                  <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Report</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                              <thead>
+                                <tr>
+                                  <th>#</th>
+                                  <th>Payload</th>
+                                  <th>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for p, s in result.results.items %}
+                                <tr>
+                                  <th scope="row">{{ forloop.counter }}</th>
+                                  <td>{{ p }}</td>
+                                  <td>{{ s }}</td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="alert alert-info" role="alert">
+            No history found
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

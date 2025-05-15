@@ -1,0 +1,220 @@
+{% extends 'base.html'%}
+
+{% load static %}
+{% block content %}
+
+
+
+      <!--  Header End -->
+      <div class="container-fluid">
+        <!--  Row 1 -->
+        <div class="row">
+          <div class="col-lg-20 d-flex align-items-strech">
+            <div class="card w-100">
+              <div class="card-body">
+                <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                  <div class="mb-3 mb-sm-0">
+                    <h5 class="card-title fw-semibold">Technology Detection</h5>
+                  </div>
+                </div>
+                <div>
+
+                  <form method="POST" action="{% url 'tech' %}">
+                    {%  csrf_token  %}
+                    <div class="form-group">
+                      <label for="exampleInputPassword1">URL</label>
+                      <input type="text" class="form-control form-control-lg" placeholder="https://site.com" name="url">
+                    </div>
+                    <br>
+                    <div class="btn-group d-flex" role="group">
+                      <button type="submit" class="btn btn-primary">Scan</button>
+                    </div>
+                  </form>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% if error %}
+          <div class="row">
+            <h1>{{ error }}</h1>
+          </div>
+        {%else%}
+        {% if url %}
+
+        <br>
+        <br>
+        <style>
+          .result-row {
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center items vertically */
+            margin-bottom: 10px; /* Space between rows */
+        }
+        
+        .result-label {
+            font-weight: bold; /* Make the label bold */
+            margin-right: 5px; /* Space between label and value */
+            font-size: 18px; /* Increase font size for labels */
+        }
+        
+        .result-value {
+            margin-right: 20px; /* Space between different values */
+            font-size: 18px; /* Increase font size for values */
+        }
+        </style>
+        <div class="result-row">
+          <span class="result-label">URL:</span> <span class="result-value">{{ url }}</span>
+
+        </div>
+
+        <br>
+
+        <div class="row">
+          <div class="col-lg-20 d-flex align-items-strech">
+            <div class="card w-100">
+              <div class="card-body">
+                <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                  <div class="mb-3 mb-sm-0">
+                    <h5 class="card-title fw-semibold">Report</h5>
+                  </div>
+                </div>
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Technology</th>
+                      <th scope="col">Version</th>
+                      <th scope="col">Confidence (%)</th>
+                      <th scope="col">Categories</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for url, technologies in tech_data.items %}
+                      {% for tech_name, tech_data in technologies.items %}
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{{ tech_name }}</td>
+                          <td>{{ tech_data.version|default:"N/A" }}</td>
+                          <td>{{ tech_data.confidence }}</td>
+                          <td>{{ tech_data.categories|join:", " }}</td>
+                        </tr>
+                      {% endfor %}
+                    {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center">No technologies detected.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% endif %}
+        {% endif %}
+
+
+        <br>
+
+      <div class="row">
+        <div class="col-lg-20 d-flex align-items-strech">
+          <div class="card w-100">
+            <div class="card-body">
+              <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                <div class="mb-3 mb-sm-0">
+                  <h5 class="card-title fw-semibold">History</h5>
+                </div>
+              </div>
+              {% if results %}
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Target Url</th>
+                    <th scope="col">Scanned On</th>
+                    <th scope="col">Action</th>
+
+
+                  </tr>
+                </thead>
+                <tbody>
+                 {% for result in results %}
+                  <tr>
+                    <th scope="row"> {{forloop.counter}} </th>
+                    <td>{{result.url}}</td>
+                    <td>{{result.created_on}}</td>
+                    <td>
+                      <a class="btn btn-primary" data-bs-toggle="modal" href="#exampleModalToggle" role="button">Details</a>
+
+                      
+
+
+                      <div class="modal" tabindex="-1" id="exampleModalToggle" aria-hidden="true" class="exampleModal">
+                        <div class="modal-dialog modal-xl">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">Report</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover">
+                                  <table class="table table-striped">
+                                    <thead>
+                                      <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Technology</th>
+                                        <th scope="col">Version</th>
+                                        <th scope="col">Confidence (%)</th>
+                                        <th scope="col">Categories</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for url, technologies in result.tech.items %}
+                                        {% for tech_name, tech_data in technologies.items %}
+                                          <tr>
+                                            <th scope="row">{{ forloop.counter }}</th>
+                                            <td>{{ tech_name }}</td>
+                                            <td>{{ tech_data.version|default:"N/A" }}</td>
+                                            <td>{{ tech_data.confidence }}</td>
+                                            <td>{{ tech_data.categories|join:", " }}</td>
+                                          </tr>
+                                        {% endfor %}
+                                      {% empty %}
+                                      <tr>
+                                        <td colspan="5" class="text-center">No technologies detected.</td>
+                                      </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                              </div>
+                        </div>
+                              
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                
+                 
+                </tbody>
+              </table>
+              {% else %}
+                <div class="alert alert-info" role="alert">
+                  No history found
+                </div>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+        {% endblock %}

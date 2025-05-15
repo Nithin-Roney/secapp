@@ -1,0 +1,66 @@
+<!-- templates/multi_scan.html -->
+{% extends 'base.html' %}
+{% block content %}
+
+      <!--  Header End -->
+      <div class="container-fluid">
+        <!--  Row 1 -->
+        <div class="row">
+          <div class="col-lg-20 d-flex align-items-strech">
+            <div class="card w-100">
+              <div class="card-body">
+                <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                  <div class="mb-3 mb-sm-0">
+
+  <h2 class="card-title fw-semibold">Vulnerability Scanner</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <div>
+      <label>URL to scan:</label>
+      <input type="url" name="url" required class="form-control">
+    </div>
+    <div class="mt-2">
+      <label>Select Scans:</label><br>
+      <label><input type="checkbox" name="scan_type" value="ssti"> SSTI</label><br>
+      <label><input type="checkbox" name="scan_type" value="xss"> XSS</label><br>
+      <label><input type="checkbox" name="scan_type" value="sqli"> SQLi</label><br>
+      <label><input type="checkbox" name="scan_type" value="lfi"> LFI</label><br>
+      <label><input type="checkbox" name="scan_type" value="redirect"> Open Redirect</label><br>
+      <label><input type="checkbox" name="scan_type" value="headers"> Security Headers</label><br>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Scan</button>
+  </form>
+
+  {% if url %}
+  <div class="mt-4">
+    <h4>Scan Results for {{ url }}</h4>
+    {% for category, findings in result.items %}
+      <h5>{{ category }}</h5>
+      <ul>
+        {% for key, val in findings.items %}
+          <li><strong>{{ key }}</strong>: {{ val }}</li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <hr>
+  <h4>Scan History</h4>
+  <ul>
+    {% for entry in results %}
+      <li>
+        <strong>{{ entry.url }}</strong> scanned on {{ entry.created_on }}<br>
+        
+        {{ entry.results }}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
